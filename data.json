@@ -1,0 +1,7 @@
+{
+    "connector_json": {
+        "clickTime": 0.1,
+        "clickCount": 20,
+        "clickBlock": false
+    }
+}

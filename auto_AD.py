@@ -2,7 +2,8 @@ import mouse
 import keyboard
 import time
 import sys
-
+import json
+import signal
 
 #--------------------------变量定义--------------------------
 
@@ -42,6 +43,7 @@ def enable():
     command = input().lstrip().rstrip()
     if command == 'exit':
         print(' 拜拜！ ')
+        save_data()
         sys.exit(0)
     elif command == '?':
         my_help()
@@ -50,7 +52,7 @@ def enable():
     elif command == 'connector':
         view = 'connector'
         mouse.hook(connector_handler)
-        print('点击鼠标侧键触发一次连点器')
+        print('tips: 点击鼠标侧键触发一次连点器')
         return ''
     return command
 
@@ -97,6 +99,38 @@ def connector():
         clickBlock = True
         return ''
     return command
+
+def init_data():
+    global clickTime, clickCount, clickBlock, tag
+    try:
+        global_json = {}
+        with open('data.json', 'r', encoding='utf-8') as file:
+            global_json = json.load(file)
+        print(global_json)
+        clickTime = global_json['connector_json']['clickTime']
+        clickCount = global_json['connector_json']['clickCount']
+        clickBlock = global_json['connector_json']['clickBlock']
+    except Exception as e:
+        pass
+
+# 保存数据的函数
+def save_data():
+    # 这里可以添加保存数据的逻辑
+    global_json = {}
+    connector_json = {}
+    connector_json['clickTime'] = clickTime
+    connector_json['clickCount'] = clickCount
+    connector_json['clickBlock'] = clickBlock
+    global_json['connector_json'] = connector_json
+    with open('data.json', 'w') as file:
+        json.dump(global_json, file, indent=4)
+
+# 信号处理函数
+def signal_handler(sig, frame):
+    save_data()
+    sys.exit(0)
+
+
 #------------------------定义映射-------------------------------
 views = {
     'enable': enable,
@@ -119,10 +153,18 @@ def connector_handler(event):
     return False
 
 #--------------------------程序入口-----------------------------
+
+# 注册信号处理函数
+signal.signal(signal.SIGINT, signal_handler)  # 捕获 Ctrl+C
+signal.signal(signal.SIGTERM, signal_handler)  # 捕获终止信号
+
+init_data()
+
 while True:
     command = views[view]()
     if command == 'abort':
-        print(' 加纳！ ')
+        print(' 拜拜！ ')
+        save_data()
         sys.exit(0)
     elif command != '':
         print('当前输入的指令不正确或者不存在！')
