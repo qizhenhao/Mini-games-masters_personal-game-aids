@@ -4,7 +4,7 @@ import time
 import sys
 import json
 import signal
-
+import util
 #--------------------------变量定义--------------------------
 
 
@@ -142,7 +142,7 @@ def connector_handler(event):
     if isinstance(event, mouse.ButtonEvent):
         if event.button == 'x':
             for _ in range(clickCount):
-                mouse.click()
+                util.mouse_click()
                 time.sleep(clickTime)
             if clickBlock:
                 # 点一次生效一次
